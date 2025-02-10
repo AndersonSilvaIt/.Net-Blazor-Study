@@ -1,0 +1,92 @@
+﻿@using System.ComponentModel.DataAnnotations
+@inject IProductService ProductService
+
+<div class="modal fade" tabindex="-1" role="dialog" style="display: @(isVisible ? "block" : "none");" id="productModal" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">@modalTitle</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="product" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="form-group mb-3">
+                        <label for="productName" class="form-label">Nome</label>
+                        <InputText id="productName" class="form-control" @bind-Value="product.Name" />
+                        <ValidationMessage For="@(() => product.Name)" />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="productDescription" class="form-label">Descrição</label>
+                        <InputText id="productDescription" class="form-control" @bind-Value="product.Description" />
+                        <ValidationMessage For="@(() => product.Description)" />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="productPrice" class="form-label">Preço</label>
+                        <InputNumber id="productPrice" class="form-control" @bind-Value="product.Price" />
+                        <ValidationMessage For="@(() => product.Price)" />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="productStock" class="form-label">Estoque</label>
+                        <InputNumber id="productStock" class="form-control" @bind-Value="product.Stock" />
+                        <ValidationMessage For="@(() => product.Stock)" />
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                        <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancelar</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+	private bool isVisible = false;
+	private Product product = new Product();
+	private string modalTitle = "Adicionar Produto";
+
+	[Parameter] public EventCallback OnSave { get; set; }
+
+	public void ShowAddModal()
+	{
+		modalTitle = "Adicionar Produto";
+		product = new Product();
+		isVisible = true;
+	}
+
+	public void ShowEditModal(Product productToEdit)
+	{
+		modalTitle = "Editar Produto";
+		product = productToEdit;
+		isVisible = true;
+	}
+
+	private async Task HandleValidSubmit()
+	{
+		if (product.Id == 0)
+		{
+			await ProductService.AddProductAsync(product);
+		}
+		else
+		{
+			await ProductService.UpdateProductAsync(product);
+		}
+
+		await OnSave.InvokeAsync();
+		CloseModal();
+	}
+
+	private void CloseModal()
+	{
+		isVisible = false; // Torna o modal invisível
+	}
+
+}

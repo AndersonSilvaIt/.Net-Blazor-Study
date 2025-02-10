@@ -1,0 +1,17 @@
+﻿/* Exemplo de estilo personalizado */
+body {
+    font-family: 'Arial', sans-serif;
+}
+
+.table {
+    border: 1px solid #ddd;
+}
+
+.modal-header {
+    background-color: #007bff;
+    color: white;
+}
+
+.modal-body {
+    padding: 20px;
+}

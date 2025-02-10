@@ -1,0 +1,85 @@
+﻿@page "/"
+
+@inject IProductService ProductService
+
+<PageTitle>Lista de Produto</PageTitle>
+
+
+<h3>Lista de Produtos</h3>
+
+<button class="btn btn-primary" @onclick="ShowAddModal">Adicionar Produto</button>
+
+<div class="container mt-4">
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Preço</th>
+                    <th>Estoque</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in products)
+                {
+                    <tr>
+                        <td>@product.Id</td>
+                        <td>@product.Name</td>
+                        <td>@product.Description</td>
+                        <td>@product.Price.ToString("C2")</td>
+                        <td>@product.Stock</td>
+                        <td>
+                            <button class="btn btn-info btn-sm" @onclick="() => ShowEditModal(product.Id)">Editar</button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteProduct(product.Id)">Excluir</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<ProductModal @ref="productModal" OnSave="LoadProducts" />
+
+@code {
+	private List<Product> products = new List<Product>();
+	private ProductModal productModal;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadProducts();
+	}
+
+	private async Task LoadProducts()
+	{
+		products = await ProductService.GetAllProductsAsync();
+	}
+
+	private void ShowAddModal()
+	{
+		productModal.ShowAddModal();
+	}
+
+	private void ShowEditModal(int id)
+	{
+		var product = products.FirstOrDefault(predicate => predicate.Id == id);
+
+		if (product != null)
+		{
+			productModal.ShowEditModal(product);
+		}
+	}
+
+	private async Task DeleteProduct(int id)
+	{
+		await ProductService.DeleteProductAsync(id);
+
+		await LoadProducts();
+	}
+
+}
+
